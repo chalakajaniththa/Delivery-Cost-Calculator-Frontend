@@ -26,7 +26,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+# .env*.local
+# I do not add the .env file to the .gitignore file because this is an assignment. But in production, I should not commit this file to version control.
 
 # vercel
 .vercel

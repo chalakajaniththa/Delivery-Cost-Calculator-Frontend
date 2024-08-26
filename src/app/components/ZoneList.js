@@ -11,6 +11,9 @@ const ZoneList = () => {
   const [filteredSuburbs, setFilteredSuburbs] = useState([]);
   const [stateInput, setStateInput] = useState('');
   const [isStateLocked, setIsStateLocked] = useState(false);
+  const [postalCodePattern, setPostalCodePattern] = useState('\\d{4}');
+  const [postalCodePlaceholder, setPostalCodePlaceholder] = useState('1234');
+  const [postalCode, setPostalCode] = useState('');
 
   useEffect(() => {
     const fetchZones = async () => {
@@ -73,6 +76,40 @@ const ZoneList = () => {
     }
   };
 
+  const handlePostalCodeTypeChange = (e) => {
+    const selectedType = e.target.value;
+
+    switch (selectedType) {
+      case 'single':
+        setPostalCodePattern('\\d{4}');
+        setPostalCodePlaceholder('1234');
+        break;
+      case 'range':
+        setPostalCodePattern('\\d{4}-\\d{4}');
+        setPostalCodePlaceholder('1234-5678');
+        break;
+      case 'list':
+        setPostalCodePattern('(\\d{4},\\s*)*\\d{4}');
+        setPostalCodePlaceholder('1234, 5678, 9101, ...');
+        break;
+      default:
+        setPostalCodePattern('\\d{4}');
+        setPostalCodePlaceholder('1234');
+        break;
+    }
+    setPostalCode('');
+  };
+
+  const handlePostalCodeChange = (e) => {
+    const { value } = e.target;
+    const regex = new RegExp(postalCodePattern);
+
+    // Only update input value if it matches the pattern
+    if (regex.test(value)) {
+        setPostalCode(value);
+    }
+  };
+
   return (
     <div className="bg-gray-100 p-10">
         <form action="/submit-data" method="POST" className="bg-white p-6 rounded shadow-md">
@@ -106,14 +143,14 @@ const ZoneList = () => {
                         <label htmlFor="state" className="block mb-2 font-semibold">State:</label>
                         <input type="text" id="state" name="cities[0][suburbs][0][state]" value={stateInput} required className="border border-gray-300 p-2 w-full mb-4 rounded" onChange={(e) => setStateInput(e.target.value)} readOnly={isStateLocked}/>
                         <label htmlFor="postalCodeType" className="block mb-2 font-semibold">Postal Code Type:</label>
-                        <select id="postalCodeType" name="cities[0][suburbs][0][postalCodeType]" required className="border border-gray-300 p-2 w-full mb-4 rounded">
+                        <select id="postalCodeType" name="cities[0][suburbs][0][postalCodeType]" required className="border border-gray-300 p-2 w-full mb-4 rounded" onChange={handlePostalCodeTypeChange}>
                             <option value="single">Single</option>
                             <option value="range">Range</option>
                             <option value="list">List</option>
                         </select>
                         <div id="postalCodeInput" className="mb-4">
-                            <label for="postalCode" className="block mb-2 font-semibold">Postal Code:</label>
-                            <input type="text" id="postalCode" name="cities[0][suburbs][0][postalCodes]" required className="border border-gray-300 p-2 w-full mb-4 rounded"/>
+                            <label htmlFor="postalCode" className="block mb-2 font-semibold">Postal Code:</label>
+                            <input type="text" id="postalCode" name="cities[0][suburbs][0][postalCodes]" required className="border border-gray-300 p-2 w-full mb-4 rounded" pattern={postalCodePattern} placeholder={postalCodePlaceholder} value={postalCode} onChange={handlePostalCodeChange}/>
                         </div>
                     </div>
                 </div>
